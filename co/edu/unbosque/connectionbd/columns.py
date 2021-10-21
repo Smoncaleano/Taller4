@@ -1,6 +1,7 @@
 from co.edu.unbosque.connectionbd.ConnectionBD import *
-
+from csv import reader
 table = createTable()
+
 
 datetime_cfId = 'DATE_TIME'
 #datetime_cf = table.column_family(datetime_cfId)
@@ -30,36 +31,39 @@ totalyield_cfId = 'TOTAL_YIELD'
 #totalyield_cf = table.column_family(totalyield_cfId)
 #totalyield_cf.create()
 
-orders = [
-    {
-        'DATE_TIME': '2021/10/21',
-        'PLANT_ID': '002',
-        'SOURCE_KEY': 'asdasd',
-        'DC_POWER': '20.4',
-        'AC_POWER': '10.5',
-        'DAILY_YIELD': '1.0',
-        'TOTAL_YIELD': '300'
-    }
-]
-
 dt = dt.utcnow()
 rows = []
+listado = []
+
+with open('../connectionbd/Plant_1_Generation_Data.csv', 'r') as csv_file:
+    csv_reader = reader(csv_file)
+    # Passing the cav_reader object to list() to get a list of lists
+    listado = list(csv_reader)
 
 print('Writing orders to the table')
-for order in orders:
 
-    row_key = 'order#{}'.format(order['PLANT_ID']).encode()
+for i in range(0, len(listado)):
+    dateTime = listado[i][0]
+    plantId = listado[i][1]
+    sourceKey = listado[i][2]
+    dcPower = listado[i][3]
+    acPower = listado[i][4]
+    dailyYield = listado[i][5]
+    totalYield = listado[i][6]
+
+    row_key = 'plants#{}'.format(sourceKey).encode()
     row = table.direct_row(row_key)
 
-    row.set_cell(datetime_cfId, 'DATE_TIME'.encode(), order['DATE_TIME'], timestamp=dt)
-    row.set_cell(plant_cfId, 'PLANT_ID'.encode(), order['PLANT_ID'], timestamp=dt)
-    row.set_cell(sourcekey_cfId, 'SOURCE_KEY'.encode(), order['SOURCE_KEY'], timestamp=dt)
-    row.set_cell(dcpower_cfId, 'DC_POWER'.encode(), order['DC_POWER'], timestamp=dt)
-    row.set_cell(acpower_cfId, 'AC_POWER'.encode(), order['AC_POWER'], timestamp=dt)
-    row.set_cell(dailyYield_cfId, 'DAILY_YIELD'.encode(), order['DAILY_YIELD'], timestamp=dt)
-    row.set_cell(totalyield_cfId, 'TOTAL_YIELD'.encode(), order['TOTAL_YIELD'], timestamp=dt)
+    row.set_cell(datetime_cfId, 'DATE_TIME'.encode(), dateTime, timestamp=dt)
+    row.set_cell(plant_cfId, 'PLANT_ID'.encode(), plantId, timestamp=dt)
+    row.set_cell(sourcekey_cfId, 'SOURCE_KEY'.encode(), sourceKey, timestamp=dt)
+    row.set_cell(dcpower_cfId, 'DC_POWER'.encode(), dcPower, timestamp=dt)
+    row.set_cell(acpower_cfId, 'AC_POWER'.encode(), acPower, timestamp=dt)
+    row.set_cell(dailyYield_cfId, 'DAILY_YIELD'.encode(), dailyYield, timestamp=dt)
+    row.set_cell(totalyield_cfId, 'TOTAL_YIELD'.encode(), totalYield, timestamp=dt)
 
     rows.append(row)
+    table.mutate_rows(rows)
 
 def print_row(row):
     print("Reading data for {}:".format(row.row_key.decode('utf-8')))
@@ -75,9 +79,8 @@ def print_row(row):
                                             cell.timestamp, labels))
     print("")
 
-table.mutate_rows(rows)
 
-key = 'order#001'.encode()
 
+key = 'plants#1IF53ai7Xc0U56Y'.encode()
 row = table.read_row(key)
 print_row(row)

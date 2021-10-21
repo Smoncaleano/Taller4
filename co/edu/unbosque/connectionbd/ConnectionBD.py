@@ -5,7 +5,7 @@ from google.cloud.bigtable import column_family
 
 def createTable():
     INSTANCE_ID = 'table-1'
-    TABLE_ID = 'pandorabox'
+    TABLE_ID = 'atomSolutions'
 
     client = bigtable.Client.from_service_account_json('unbosque-service-account.json', admin=True)
     instance = client.instance(INSTANCE_ID)
