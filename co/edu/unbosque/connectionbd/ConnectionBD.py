@@ -3,8 +3,19 @@ from datetime import datetime as dt
 from google.cloud import bigtable
 from google.cloud.bigtable import column_family
 
-INSTANCE_ID = 'table-1'
-TABLE_ID = 'orders_{}'.format(time.time())
+def createTable():
+    INSTANCE_ID = 'table-1'
+    TABLE_ID = 'pandorabox'
 
-client = bigtable.Client.from_service_account_json('../../unbosque-service-account.json', admin = True)
-instance = client.instance(INSTANCE_ID)
+    client = bigtable.Client.from_service_account_json('unbosque-service-account.json', admin=True)
+    instance = client.instance(INSTANCE_ID)
+
+    table = instance.table(TABLE_ID)
+
+    if not table.exists():
+        table.create()
+        print('Se creo la tabla')
+    else:
+        print("ERROR: Table {} already exists".format(TABLE_ID))
+
+    return table
